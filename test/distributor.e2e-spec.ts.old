@@ -1,0 +1,51 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { createSession, clearAll } from './e2eBase';
+
+describe('Distributor (e2e)', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+
+    await clearAll(app);
+  });
+
+  it('create get update distributor & create get update order', async () => {
+    const session = await createSession(app);
+
+    await request(app.getHttpServer())
+      .get('/distributors/' + session.distributor.id)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.id).toBe(session.distributor.id);
+        expect(response.body.gameSession.id).toBe(session.id);
+      });
+
+    await request(app.getHttpServer())
+      .patch('/distributors/' + session.distributor.id)
+      .send({ id: session.distributor.id, weeklyOrder: 10, assigned: true })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.weeklyOrder).toBe(10);
+        expect(response.body.backlogInCrates).toBe(150);
+        expect(response.body.lastOrderResult).toBe(150);
+        expect(response.body.assigned).toBe(true);
+      });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+});

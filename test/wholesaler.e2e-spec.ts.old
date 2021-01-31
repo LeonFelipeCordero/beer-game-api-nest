@@ -1,0 +1,57 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { clearAll, createSession } from './e2eBase';
+
+describe('Wholesaler (e2e)', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+
+    await clearAll(app);
+  });
+
+  it('create get update wholesaler & create get update order', async () => {
+    const session = await createSession(app);
+
+    await request(app.getHttpServer())
+      .get('/wholesalers/' + session.wholesaler.id)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.id).toBe(session.wholesaler.id);
+        expect(response.body.gameSession.id).toBe(session.id);
+      });
+
+    await request(app.getHttpServer())
+      .patch('/wholesalers/' + session.wholesaler.id)
+      .send({
+        id: session.wholesaler.id,
+        weeklyOrder: 10,
+        backlogInCrates: 15,
+        lastOrderResult: 10,
+        assigned: false,
+      })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.weeklyOrder).toBe(10);
+        expect(response.body.backlogInCrates).toBe(15);
+        expect(response.body.lastOrderResult).toBe(10);
+        expect(response.body.assigned).toBe(false);
+      });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+});

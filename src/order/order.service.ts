@@ -40,7 +40,7 @@ export class OrderService {
           datetime: LessThan(this.getTimeToUnblock()),
         },
       })
-      .then((orders) => this.changeOrdersStatus(orders, OrderStatus.InProgres));
+      .then((orders) => this.changeOrdersStatus(orders, OrderStatus.Pending));
   }
 
   async insertOne(request: OrderDTO, internal = false): Promise<Order> {

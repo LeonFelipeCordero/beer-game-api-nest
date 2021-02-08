@@ -80,7 +80,7 @@ export class PlayerService {
         ? payload.quantity * 10
         : payload.quantity;
 
-    receiver.lastOrderResult += payload.quantity;
+    receiver.lastOrderResult = payload.quantity;
 
     this.logger.log(
       `player ${receiver.id} recieving ${payload.quantity} crates`,

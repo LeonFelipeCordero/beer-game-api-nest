@@ -16,6 +16,11 @@ export class JobsService {
     this.logger = new Logger(JobsService.name);
   }
 
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  checkForCompleteness() {
+    this.gameSessoinService.checkForCompleteness();
+  }
+
   @Cron(CronExpression.EVERY_30_SECONDS)
   createOrders() {
     this.logger.log('starting new round of orders');
@@ -24,10 +29,9 @@ export class JobsService {
     });
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  checkForCompleteness() {
-    this.logger.log('checking for complete order');
-    this.gameSessoinService.checkForCompleteness();
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  stopOrdersDelay() {
+    this.orderService.unblockOrders();
   }
 
   private startOrdering(session: GameSession) {

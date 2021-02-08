@@ -1,0 +1,82 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
+import { createSession, clearAll } from './e2eBase';
+import * as request from 'supertest';
+import { OrderType } from '../src/order/order.type';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+describe('Events (e2e)', () => {
+  let app: INestApplication;
+  let eventEmmiter: EventEmitter2;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+
+    await clearAll(app);
+
+    eventEmmiter = app.get<EventEmitter2>(EventEmitter2);
+  });
+
+  it('should create event', async () => {
+    const session = await createSession(app);
+
+    var order = await request(app.getHttpServer())
+      .post('/orders/')
+      .send({ quantity: 5, session: session.id, type: 'WholesalerOrder' })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(201)
+      .then((response) => {
+        expect(response.body.id).not.toBeNull();
+        expect(response.body.quantity).toBe(5);
+        expect(response.body.quantityDelivered).toBeNull();
+        expect(response.body.type).toBe('WholesalerOrder');
+        return response.body;
+      });
+
+    order = await request(app.getHttpServer())
+      .get('/orders/' + order.id)
+      .set('Accept', 'application/json')
+      .then((response) => response.body);
+
+    await request(app.getHttpServer())
+      .patch('/orders/' + order.id + '/deliver')
+      .send({
+        id: order.id,
+        quantity: 4,
+        type: OrderType.WholesalerOrder,
+      })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.status).toBe('InProgres');
+      });
+
+    // await request(app.getHttpServer())
+    //   .get('/players/' + order.sender.id)
+    //   .set('Accept', 'application/json')
+    //   .then((response) => {
+    //     expect(response.body.backlog).toBe(90);
+    //     expect(response.body.lastOrderResult).toBe(5);
+    //   });
+
+    // return await request(app.getHttpServer())
+    //   .get('/players/' + order.receiver.id)
+    //   .set('Accept', 'application/json')
+    //   .then((response) => {
+    //     expect(response.body.backlog).toBe(90);
+    //     expect(response.body.lastOrderResult).toBe(5);
+    //   });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+});

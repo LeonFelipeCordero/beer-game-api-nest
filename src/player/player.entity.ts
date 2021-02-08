@@ -29,27 +29,29 @@ export class Player {
   @Column({ default: false })
   assigned: boolean;
 
-  @ManyToOne(() => GameSession, (gameSession) => gameSession.retailer)
+  @ManyToOne(() => GameSession, (gameSession) => gameSession.players)
   gameSession: GameSession;
 
   @OneToMany(() => Order, (order) => order.sender)
-  outgoingOrders: Order[];
+  sendingOrders: Order[];
 
   @OneToMany(() => Order, (order) => order.receiver)
-  incomingOrders: Order[];
+  receivingOrders: Order[];
 
   constructor(
+    type: PlayerType,
     backlog: number,
     weeklyOrder: number,
     lastOrderResult: number,
     gameSession?: GameSession,
-    outgoingOrders?: Order[],
-    incomingOrders?: Order[],
+    sendingOrders?: Order[],
+    receivingOrders?: Order[],
     id?: string,
   ) {
+    this.type = type;
     this.gameSession = gameSession;
-    this.outgoingOrders = outgoingOrders;
-    this.incomingOrders = incomingOrders;
+    this.sendingOrders = sendingOrders;
+    this.receivingOrders = receivingOrders;
     this.backlog = backlog;
     this.lastOrderResult = lastOrderResult;
     this.weeklyOrder = weeklyOrder;

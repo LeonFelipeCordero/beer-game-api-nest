@@ -31,7 +31,7 @@ describe('Player (e2e)', () => {
         expect(response.body.gameSession.id).toBe(session.id);
       });
 
-    return await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .patch('/players/' + session.players[0].id)
       .send({
         id: session.players[0].id,

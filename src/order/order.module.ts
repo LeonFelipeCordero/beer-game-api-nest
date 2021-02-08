@@ -4,9 +4,10 @@ import { Order } from './order.entity';
 import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { GameSessionModule } from '../session/gameSession.module';
+import { EventsModule } from '../events/events.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order]), GameSessionModule],
+  imports: [TypeOrmModule.forFeature([Order]), GameSessionModule, EventsModule],
   providers: [OrderService],
   controllers: [OrderController],
   exports: [OrderService],

@@ -12,7 +12,7 @@ export class FactoryService {
   ) {}
 
   async getOne(id: string): Promise<Factory> {
-    return this.factoryRepository.findOne(id, {
+    return this.factoryRepository.findOneOrFail(id, {
       relations: ['gameSession', 'orders'],
     });
   }

@@ -1,0 +1,56 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { JobsService } from './jobs.service';
+import { Order } from '../order/order.entity';
+import { GameSession } from '../session/gameSession.entity';
+import { GameSessionService } from '../session/gameSession.service';
+import { OrderService } from '../order/order.service';
+
+describe('JobsService', () => {
+  let service: JobsService;
+  let sessionService: GameSessionService;
+  let orderService: OrderService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        JobsService,
+        {
+          provide: 'OrderService',
+          useValue: {
+            unblockOrders: jest.fn().getMockImplementation(),
+            insertOne: jest.fn().mockReturnValue(Promise.resolve(new Order(1))),
+          },
+        },
+        {
+          provide: 'GameSessionService',
+          useValue: {
+            getAllCompletedSessions: jest
+              .fn()
+              .mockReturnValue([new GameSession('name', '1234')]),
+            checkForCompleteness: jest
+              .fn()
+              .mockReturnValue([new GameSession('name', '1234')]),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<JobsService>(JobsService);
+  });
+
+  it('should call game session service to complete orders', async () => {
+    await service.checkForCompleteness();
+    expect(sessionService.checkForCompleteness).toBeCalledTimes(1);
+  });
+
+  it('should call game session to get one and call order to create orders', async () => {
+    await service.createOrders();
+    expect(sessionService.getAllCompletedSessions).toBeCalledTimes(1);
+    expect(orderService.insertOne).toBeCalledTimes(4);
+  });
+
+  it('should call unblock offers', async () => {
+    await service.stopOrdersDelay();
+    expect(orderService.unblockOrders).toBeCalledTimes(1);
+  });
+});

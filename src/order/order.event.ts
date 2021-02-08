@@ -1,6 +1,9 @@
+import { OrderType } from './order.type';
+
 export interface OrderDeliveredEvent {
   id: string;
   quantity: number;
-  receiver: any;
-  creator: any;
+  type: OrderType;
+  receiver: string;
+  sender: string;
 }

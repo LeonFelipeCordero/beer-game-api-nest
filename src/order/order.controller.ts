@@ -3,7 +3,7 @@ import { OrderDTO } from './order.dto';
 import { Order } from './order.entity';
 import { OrderService } from './order.service';
 
-@Controller('order')
+@Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -24,6 +24,6 @@ export class OrderController {
 
   @Patch(':id/deliver')
   async deliverOrdeR(@Body() request: OrderDTO): Promise<Order> {
-    return this.orderService.updateOne(request, true);
+    return this.orderService.deliver(request);
   }
 }

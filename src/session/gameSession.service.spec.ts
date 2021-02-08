@@ -4,24 +4,21 @@ import { GameSessionRequest } from './model/gameSession.request';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GameSession } from './gameSession.entity';
 import { Repository } from 'typeorm';
-import { Retailer } from '../retailer/retailer.entity';
-import { Wholesaler } from '../wholesaler/wholesaler.entity';
-import { Distributor } from '../distributor/distributor.entity';
-import { Factory } from '../factory/factory.entity';
-import { RetailerService } from '../retailer/retailer.service';
-import { WholesalerService } from '../wholesaler/wholesaler.service';
 import { FactoryService } from '../factory/factory.service';
-import { DistributorService } from '../distributor/distributor.service';
+import { Player } from '../player/player.entity';
+import { PlayerType } from '../player/player.type';
+import { Factory } from '../factory/factory.entity';
+import { PlayerService } from '../player/player.service';
 
 const mockSession = new GameSession('session name', '1234', new Date(), '1');
+const mockPlayer = new Player(PlayerType.Distributor, 5, 5, 5);
+const mockFactory = new Factory();
 
 describe('game session service', () => {
   let service: GameSessionService;
   let repository: Repository<GameSession>;
-  let retailerService: RetailerService;
-  let wholesalerService: WholesalerService;
-  let distributorService: DistributorService;
   let factoryService: FactoryService;
+  let playerService: PlayerService;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -30,33 +27,23 @@ describe('game session service', () => {
         {
           provide: getRepositoryToken(GameSession),
           useValue: {
+            findOneOrFail: jest.fn().mockReturnValue(mockSession),
             findOne: jest.fn().mockReturnValue(mockSession),
             save: jest.fn().mockReturnValue(mockSession),
             find: jest.fn().mockReturnValue([mockSession]),
           },
         },
         {
-          provide: 'RetailerService',
+          provide: 'PlayerService',
           useValue: {
-            insertOne: jest
+            insertOne: jest.fn().mockReturnValue(Promise.resolve(mockPlayer)),
+            insertMany: jest
               .fn()
-              .mockReturnValue(Promise.resolve(new Retailer())),
-          },
-        },
-        {
-          provide: 'WholesalerService',
-          useValue: {
-            insertOne: jest
-              .fn()
-              .mockReturnValue(Promise.resolve(new Wholesaler())),
-          },
-        },
-        {
-          provide: 'DistributorService',
-          useValue: {
-            insertOne: jest
-              .fn()
-              .mockReturnValue(Promise.resolve(new Distributor())),
+              .mockReturnValue([
+                Promise.resolve(mockPlayer),
+                Promise.resolve(mockPlayer),
+                Promise.resolve(mockPlayer),
+              ]),
           },
         },
         {
@@ -64,7 +51,7 @@ describe('game session service', () => {
           useValue: {
             insertOne: jest
               .fn()
-              .mockReturnValue(Promise.resolve(new Factory())),
+              .mockReturnValue(Promise.resolve(Promise.resolve(mockFactory))),
           },
         },
       ],
@@ -74,9 +61,7 @@ describe('game session service', () => {
     repository = app.get<Repository<GameSession>>(
       getRepositoryToken(GameSession),
     );
-    retailerService = app.get<RetailerService>(RetailerService);
-    wholesalerService = app.get<WholesalerService>(WholesalerService);
-    distributorService = app.get<DistributorService>(DistributorService);
+    playerService = app.get<PlayerService>(PlayerService);
     factoryService = app.get<FactoryService>(FactoryService);
   });
 
@@ -86,9 +71,7 @@ describe('game session service', () => {
         new GameSessionRequest('session name', '1234'),
       );
       expect(repository.save).toBeCalledTimes(1);
-      expect(retailerService.insertOne).toBeCalledTimes(1);
-      expect(wholesalerService.insertOne).toBeCalledTimes(1);
-      expect(distributorService.insertOne).toBeCalledTimes(1);
+      expect(playerService.insertMany).toBeCalledTimes(1);
       expect(factoryService.insertOne).toBeCalledTimes(1);
 
       expect(session).toBe(mockSession);
@@ -105,7 +88,7 @@ describe('game session service', () => {
       expect(foundSession).not.toBeNull();
       expect(foundSession.id).toBe(session.id);
       expect(repository.save).toBeCalledTimes(1);
-      expect(repository.findOne).toBeCalledTimes(1);
+      expect(repository.findOneOrFail).toBeCalledTimes(1);
     });
   });
 
@@ -123,5 +106,5 @@ describe('game session service', () => {
     });
   });
 
-  describe('should complete session', () => {});
+  // describe('should complete session', () => {});
 });

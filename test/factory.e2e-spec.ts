@@ -3,7 +3,6 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { createSession, clearAll } from './e2eBase';
-import { v4 } from 'uuid';
 
 describe('Factory (e2e)', () => {
   let app: INestApplication;

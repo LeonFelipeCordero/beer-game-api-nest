@@ -27,16 +27,17 @@ export class Order {
   @ManyToOne(() => Factory, (factory) => factory.orders)
   factory?: Factory;
 
-  @ManyToOne(() => Player, (player) => player.outgoingOrders)
+  @ManyToOne(() => Player, (player) => player.sendingOrders)
   sender?: Player;
 
-  @ManyToOne(() => Player, (player) => player.incomingOrders)
+  @ManyToOne(() => Player, (player) => player.receivingOrders)
   receiver?: Player;
 
   constructor(
     quantity: number,
     quantityDelivered?: number,
     status?: OrderStatus,
+    type?: OrderType,
     id?: string,
     factory?: Factory,
     sender?: Player,
@@ -45,6 +46,7 @@ export class Order {
     this.quantity = quantity;
     this.quantityDelivered = quantityDelivered;
     this.status = status;
+    this.type = type;
     this.id = id;
     this.factory = factory;
     this.sender = sender;

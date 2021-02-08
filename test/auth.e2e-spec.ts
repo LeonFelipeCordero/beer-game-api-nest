@@ -29,7 +29,8 @@ describe('Auth (e2e)', () => {
       .then((response) => {
         expect(response.body.id).toBe(session.id);
       });
-    return await request(app.getHttpServer())
+
+    await request(app.getHttpServer())
       .post('/auth/login/')
       .send({ username: 'session name', password: '12345' })
       .set('Accept', 'application/json')

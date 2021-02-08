@@ -19,16 +19,13 @@ describe('GameSession (e2e)', () => {
 
   it('create get', async () => {
     const session = await createSession(app);
-    return await getSession(app, session.id).then((foundSession) => {
+    await getSession(app, session.id).then((foundSession) => {
       expect(session.id).toBe(foundSession.id);
       expect(session.name).toBe(foundSession.name);
       expect(session.password).toBe(foundSession.password);
       expect(session.active).toBe(foundSession.active);
       expect(session.completed).toBe(foundSession.completed);
       expect(session.finished).toBe(foundSession.finished);
-      // expect(session.retailer).not.toBeNull();
-      // expect(session.wholesaler).not.toBeNull();
-      // expect(session.distributor).not.toBeNull();
       expect(session.players).not.toBeNull();
       expect(session.players).not.toBe([]);
       expect(session.players.length).toBe(3);

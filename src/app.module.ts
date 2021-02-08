@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RetailerModule } from './retailer/retailer.module';
 import { GameSessionModule } from './session/gameSession.module';
-import { WholesalerModule } from './wholesaler/wholesaler.module';
-import { DistributorModule } from './distributor/distributor.module';
 import { FactoryModule } from './factory/factory.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
@@ -27,10 +24,7 @@ const typeOrmModule = TypeOrmModule.forRoot({
 
 @Module({
   imports: [
-    RetailerModule,
     GameSessionModule,
-    WholesalerModule,
-    DistributorModule,
     FactoryModule,
     ScheduleModule.forRoot(),
     AuthModule,

@@ -25,7 +25,9 @@ describe('game session service', () => {
         {
           provide: getRepositoryToken(Factory),
           useValue: {
-            findOne: jest.fn().mockReturnValue(Promise.resolve(mockFactory)),
+            findOneOrFail: jest
+              .fn()
+              .mockReturnValue(Promise.resolve(mockFactory)),
             save: jest.fn().mockReturnValue(Promise.resolve(mockFactory)),
             update: jest.fn().mockReturnValue(Promise.resolve(mockFactory)),
           },
@@ -42,13 +44,13 @@ describe('game session service', () => {
     it('should get factory from database', async () => {
       const foundFactory = await service.getOne('1');
       expect(foundFactory).not.toBeNull();
-      expect(repository.findOne).toBeCalledTimes(1);
+      expect(repository.findOneOrFail).toBeCalledTimes(1);
     });
   });
   describe('updateOne', () => {
     it('should update', async () => {
       await service.updateOne({});
-      expect(repository.findOne).toBeCalledTimes(1);
+      expect(repository.findOneOrFail).toBeCalledTimes(1);
       expect(repository.update).toBeCalledTimes(1);
     });
   });

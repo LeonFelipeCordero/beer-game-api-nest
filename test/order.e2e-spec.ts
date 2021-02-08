@@ -3,9 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { createSession, clearAll } from './e2eBase';
-import { OrderStatus } from '../src/order/order.status';
-import { OrderType } from '../src/order/order.type';
 import { PlayerType } from '../src/player/player.type';
+import { OrderType } from '../src/order/order.type';
+import { OrderStatus } from '../src/order/order.status';
 
 describe('Order (e2e)', () => {
   let app: INestApplication;
@@ -25,7 +25,7 @@ describe('Order (e2e)', () => {
     const session = await createSession(app);
 
     const order = await request(app.getHttpServer())
-      .post('/order/')
+      .post('/orders/')
       .send({ session: session.id, type: 'WholesalerOrder' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -41,7 +41,7 @@ describe('Order (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get('/order/' + order.id)
+      .get('/orders/' + order.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -53,7 +53,7 @@ describe('Order (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch('/order/' + order.id)
+      .patch('/orders/' + order.id)
       .send({
         id: order.id,
         quantity: 10,
@@ -70,9 +70,9 @@ describe('Order (e2e)', () => {
         expect(response.body.factory).toBeNull();
       });
 
-    return await request(app.getHttpServer())
-      .patch('/order/' + order.id + '/deliver')
-      .send({ id: order.id, status: 'InProgres' })
+    await request(app.getHttpServer())
+      .patch('/orders/' + order.id + '/deliver')
+      .send({ id: order.id, type: 'WholesalerOrder' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

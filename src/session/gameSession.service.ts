@@ -5,12 +5,11 @@ import { GameSession } from './gameSession.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FactoryService } from '../factory/factory.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerType } from '../player/player.type';
+import { playersInitialInfo } from '../player/players.info';
 
 @Injectable()
 export class GameSessionService {
   private readonly logger: Logger;
-  private readonly playersInfo: any;
 
   constructor(
     private readonly factoryService: FactoryService,
@@ -19,30 +18,10 @@ export class GameSessionService {
     private readonly sessionRepository: Repository<GameSession>,
   ) {
     this.logger = new Logger(GameSessionService.name);
-    this.playersInfo = [
-      {
-        type: PlayerType.Retailer,
-        backlog: 100,
-        lastOrderResult: 5,
-        weeklyOrder: 5,
-      },
-      {
-        type: PlayerType.Wholesaler,
-        backlog: 50,
-        lastOrderResult: 50,
-        weeklyOrder: 50,
-      },
-      {
-        type: PlayerType.Distributor,
-        backlog: 150,
-        lastOrderResult: 150,
-        weeklyOrder: 150,
-      },
-    ];
   }
 
   async getOne(id: string): Promise<GameSession> {
-    return this.sessionRepository.findOne(id, {
+    return this.sessionRepository.findOneOrFail(id, {
       relations: ['factory', 'players'],
     });
   }
@@ -67,36 +46,37 @@ export class GameSessionService {
         where: [{ active: true, completed: false, finished: false }],
         relations: ['factory', 'players'],
       })
-      .then((sessions) => {
-        sessions.forEach((session) => {
-          if (this.isSessionComplete(session)) {
-            this.logger.log(
-              `setting session ${session.id} as completed and ready to play`,
-            );
-            session.completed = true;
-            this.sessionRepository.save(session);
-          }
-        });
-      });
+      .then((sessions) => this.markSessionAsCompleted(sessions));
   }
 
   async insertOne(request: GameSessionRequest): Promise<GameSession> {
     const session = new GameSession(request.name, request.password, new Date());
     return this.factoryService
       .insertOne()
-      .then((factory) => {
-        session.factory = factory;
-      })
-      .then(() => {
-        this.playersInfo.forEach(
-          (info: any) => (info['sessionId'] = session.id),
-        );
-        return this.playerService.insertMany(this.playersInfo);
-      })
-      .then((players) => {
-        session.players = players;
-      })
+      .then((factory) => (session.factory = factory))
+      .then(() => this.createPlayers(session))
+      .then((players) => (session.players = players))
       .then(() => this.sessionRepository.save(session));
+  }
+
+  private markSessionAsCompleted(sessions: GameSession[]) {
+    sessions.forEach((session) => {
+      if (this.isSessionComplete(session)) {
+        this.logger.log(
+          `setting session ${session.id} as completed and ready to play`,
+        );
+        session.completed = true;
+        this.sessionRepository.save(session);
+      }
+    });
+  }
+
+  private async createPlayers(session: GameSession) {
+    const initialPlayers = playersInitialInfo.map((info: any) => {
+      info['sessionId'] = session.id;
+      return info;
+    });
+    return this.playerService.insertMany(initialPlayers);
   }
 
   private isSessionComplete(session: GameSession) {

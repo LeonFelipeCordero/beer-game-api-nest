@@ -43,8 +43,10 @@ export class GameSession {
   constructor(
     name: string,
     password: string,
-    datetime: Date,
+    datetime?: Date,
     id?: string,
+    factory?: Factory,
+    players?: Player[],
     active = true,
     completed = false,
     finished = false,
@@ -53,6 +55,8 @@ export class GameSession {
     this.password = password;
     this.datetime = datetime;
     this.id = id;
+    this.factory = factory;
+    this.players = players;
     this.active = active;
     this.completed = completed;
     this.finished = finished;

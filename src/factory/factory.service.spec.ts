@@ -32,6 +32,14 @@ describe('game session service', () => {
             update: jest.fn().mockReturnValue(Promise.resolve(mockFactory)),
           },
         },
+        {
+          provide: 'LocalEventEmitter',
+          useValue: {
+            emitValidateOrderEvent: () => {
+              return 1;
+            },
+          },
+        },
       ],
       imports: [],
     }).compile();

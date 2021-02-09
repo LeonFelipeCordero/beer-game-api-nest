@@ -42,16 +42,24 @@ export class PlayerService {
       .then(() => this.getOne(id));
   }
 
-  @OnEvent('order.validate')
+  @OnEvent('order.validate.player')
   validateOrderDelivering(payload: OrderDeliveredEvent) {
     this.logger.log(`handleing order validatons for order ${payload.id}`);
     this.getOne(payload.sender)
       .then((sender) => this.discountOrderQuantityToSender(sender, payload))
-      .then(() => this.getOne(payload.receiver))
-      .then((receiver) =>
-        this.increaseOrderQuantityToReceiver(receiver, payload),
-      )
-      .then(() => this.eventEmitter.emitDeliveredOrder(payload));
+      .then(() => this.eventEmitter.emitReceiveOrderEvent(payload));
+  }
+
+  @OnEvent('order.receive')
+  receiveOrder(payload: OrderDeliveredEvent) {
+    this.logger.log(`receiving order after validation for order ${payload.id}`);
+    if (payload.receiver != null)
+      this.getOne(payload.receiver)
+        .then((receiver) =>
+          this.increaseOrderQuantityToReceiver(receiver, payload),
+        )
+        .then(() => this.eventEmitter.emitDeliveredOrder(payload));
+    else this.eventEmitter.emitDeliveredOrder(payload);
   }
 
   private async discountOrderQuantityToSender(

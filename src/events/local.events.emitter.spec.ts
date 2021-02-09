@@ -45,6 +45,12 @@ describe('should emit events', () => {
     expect(eventEmiter.emit).toBeCalledTimes(1);
   });
 
+  test('should emit receive order event', () => {
+    jest.spyOn(eventEmiter, 'emit');
+    localEmitter.emitReceiveOrderEvent({});
+    expect(eventEmiter.emit).toBeCalledTimes(1);
+  });
+
   test('should emit validate delivered order event', () => {
     jest.spyOn(eventEmiter, 'emit');
     localEmitter.emitDeliveredOrder({});

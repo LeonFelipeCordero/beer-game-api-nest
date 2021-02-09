@@ -67,8 +67,10 @@ export class OrderService {
 
   @OnEvent('order.delivered')
   markAsDeliverd(payload: OrderDeliveredEvent) {
+    this.logger.log(`marking order ${payload.id} as delivered`);
     this.getOne(payload.id).then((order) => {
       order.status = OrderStatus.Delivered;
+      order.quantityDelivered = payload.quantity;
       this.logger.log(
         `Moving order status to ${OrderStatus.Delivered} for order ${payload.id}`,
       );
@@ -104,7 +106,7 @@ export class OrderService {
   }
 
   private changeOrderStatus(order: Order, status: OrderStatus) {
-    this.logger.log(`Moing order ${order.id} to ${status}`);
+    this.logger.log(`Moving order ${order.id} to ${status}`);
     order.status = status;
     this.orderRepository.save(order);
   }

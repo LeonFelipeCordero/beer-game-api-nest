@@ -4,6 +4,7 @@ import { GameSessionService } from '../session/gameSession.service';
 import { GameSession } from '../session/gameSession.entity';
 import { OrderService } from '../order/order.service';
 import { OrderType } from '../order/order.type';
+import { FactoryService } from '../factory/factory.service';
 
 @Injectable()
 export class JobsService {
@@ -12,6 +13,7 @@ export class JobsService {
   constructor(
     private readonly orderService: OrderService,
     private readonly gameSessoinService: GameSessionService,
+    private readonly factoryService: FactoryService,
   ) {
     this.logger = new Logger(JobsService.name);
   }
@@ -32,6 +34,21 @@ export class JobsService {
   @Cron(CronExpression.EVERY_30_SECONDS)
   stopOrdersDelay() {
     this.orderService.unblockOrders();
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  discountGeneralBacklogFromFactory() {
+    this.factoryService.reduceNormalBacklog();
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  releaseFactoryProduction() {
+    this.factoryService.releaseProduction();
+  }
+
+  @Cron('*/3 * * * *')
+  checkFactoriesCapacity() {
+    this.factoryService.checkFactoryCapacity();
   }
 
   private startOrdering(session: GameSession) {

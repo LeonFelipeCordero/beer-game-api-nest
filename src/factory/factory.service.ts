@@ -36,12 +36,42 @@ export class FactoryService {
       .then(() => this.getOne(id));
   }
 
+  async reduceNormalBacklog() {
+    this.logger.log('reducing orders backlog for factories');
+    this.findAllOnActiveSession().then((factories) =>
+      this.applyOnFactories(factories, this.reduceBacklog, this),
+    );
+  }
+
+  async releaseProduction() {
+    this.logger.log('releaseing factories production');
+    this.findAllOnActiveSession().then((factories) =>
+      this.applyOnFactories(factories, this.releaseFactoryProduction, this),
+    );
+  }
+
+  async checkFactoryCapacity() {
+    this.findAllOnActiveSession().then((factories) =>
+      this.applyOnFactories(factories, this.changeCapacityAllowance, this),
+    );
+  }
+
   @OnEvent('order.validate.factory')
   validateOrderDelivering(payload: OrderDeliveredEvent) {
     this.logger.log(`handleing order validatons for order ${payload.id}`);
     this.getOne(payload.sender)
       .then((sender) => this.discountOrderQuantityToSender(sender, payload))
       .then(() => this.eventEmitter.emitReceiveOrderEvent(payload));
+  }
+
+  private async findAll(): Promise<Factory[]> {
+    return this.factoryRepository.find({ relations: ['gameSession'] });
+  }
+
+  private async findAllOnActiveSession(): Promise<Factory[]> {
+    return this.findAll().then((factories) =>
+      factories.filter((factory) => factory.gameSession.completed),
+    );
   }
 
   private async discountOrderQuantityToSender(
@@ -61,5 +91,42 @@ export class FactoryService {
     );
 
     return this.factoryRepository.save(factory);
+  }
+
+  private async applyOnFactories(
+    factories: Factory[],
+    apply: (factory: Factory, context: FactoryService) => void,
+    context: FactoryService,
+  ) {
+    factories.forEach((factory) => apply(factory, context));
+  }
+
+  private async reduceBacklog(factory: Factory, context: FactoryService) {
+    const quantity = (factory.backlogOthers * 10) / 100;
+    factory.backlogOthers =
+      quantity <= factory.backlogOthers ? quantity : factory.backlogOthers;
+
+    context.factoryRepository.save(factory);
+  }
+
+  private async releaseFactoryProduction(
+    factory: Factory,
+    context: FactoryService,
+  ) {
+    factory.backlogOthers += factory.weeklyProduction;
+    factory.backlogSpecialBeer += factory.weeklySpecialProduction;
+    context.factoryRepository.save(factory);
+  }
+
+  private async changeCapacityAllowance(
+    factory: Factory,
+    context: FactoryService,
+  ) {
+    const capacitySpace =
+      factory.fullCapacity -
+      (factory.weeklyProduction + factory.weeklySpecialProduction);
+    if (capacitySpace <= 100) {
+      context.factoryRepository.save(factory);
+    }
   }
 }

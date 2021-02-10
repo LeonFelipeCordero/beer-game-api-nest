@@ -8,5 +8,6 @@ export interface FactoryDTO {
   weeklyProduction?: number;
   weeklySpecialProduction?: number;
   assigned?: boolean;
+  increaseCapacity: boolean;
   gameSession?: GameSession;
 }

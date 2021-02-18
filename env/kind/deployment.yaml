@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beer-gane-api-nest
+  namespace: beer-game
+spec:
+  selector:
+    matchLabels:
+      app: beer-gane-api-nest
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%  
+  template:
+    metadata:
+      labels:
+        app: beer-gane-api-nest
+    spec:
+      containers:
+        - name: beer-gane-api-nest
+          image: /beer-gane-api-nest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: server
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 5
+          env:
+            - name: DB_HOST
+              value: beer-game-mysql-0.default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beer-gane-api-nest
+  namespace: beer-gane
+  labels:
+    app: beer-gane-api-nest
+spec:
+  ports:
+    - port: 8080
+      name: server
+  selector:
+    app: beer-gane-api-nest

@@ -51,6 +51,15 @@ describe('Factory (e2e)', () => {
         expect(response.body.weeklySpecialProduction).toBe(10);
         expect(response.body.assigned).toBe(true);
       });
+
+    // await request(app.getHttpServer())
+    //   .patch('/factories/' + session.factory.id + 'capacity')
+    //   .set('Accept', 'application/json')
+    //   .expect('Content-Type', /json/)
+    //   .expect(200)
+    //   .then((response) => {
+    //     expect(response.body.increaseInProgress).toBe(true);
+    //   });
   });
 
   afterAll(async () => {

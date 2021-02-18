@@ -3,24 +3,15 @@ import { GameSessionModule } from './session/gameSession.module';
 import { FactoryModule } from './factory/factory.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { JobsModule } from './jobs/jobs.module';
 import { OrderModule } from './order/order.module';
 import { EventsModule } from './events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PlayerModule } from './player/player.module';
-
-const typeOrmModule = TypeOrmModule.forRoot({
-  type: 'mysql',
-  host: 'localhost',
-  port: 3306,
-  username: 'beer-game',
-  password: 'beer-game',
-  database: 'beer-game',
-  autoLoadEntities: true,
-  synchronize: true, // todo should not be used in production, it can end lossing data
-});
+import { TerminusModule } from '@nestjs/terminus';
+import { HealthModule } from './health/health.module';
+import dbConfig from './app.config';
 
 @Module({
   imports: [
@@ -28,12 +19,14 @@ const typeOrmModule = TypeOrmModule.forRoot({
     FactoryModule,
     ScheduleModule.forRoot(),
     AuthModule,
-    typeOrmModule,
+    dbConfig,
     JobsModule,
     OrderModule,
     EventsModule,
     EventEmitterModule.forRoot(),
     PlayerModule,
+    TerminusModule,
+    HealthModule,
   ],
 })
 export class AppModule {

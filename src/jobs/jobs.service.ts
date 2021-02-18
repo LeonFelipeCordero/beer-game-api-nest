@@ -51,6 +51,11 @@ export class JobsService {
     this.factoryService.checkFactoryCapacity();
   }
 
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  releaseNewProductionCapacity() {
+    this.logger.debug('something');
+  }
+
   private startOrdering(session: GameSession) {
     this.logger.log(`creating order for session ${session.id}`);
     this.orderService

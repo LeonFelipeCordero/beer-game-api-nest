@@ -56,6 +56,15 @@ export class FactoryService {
     );
   }
 
+  async increaseCapacity(id: string) {
+    return this.getOne(id)
+      .then((factory) => {
+        factory.increaseInProgress = true;
+        return factory;
+      })
+      .then((factory) => this.factoryRepository.save(factory));
+  }
+
   @OnEvent('order.validate.factory')
   validateOrderDelivering(payload: OrderDeliveredEvent) {
     this.logger.log(`handleing order validatons for order ${payload.id}`);
@@ -126,6 +135,7 @@ export class FactoryService {
       factory.fullCapacity -
       (factory.weeklyProduction + factory.weeklySpecialProduction);
     if (capacitySpace <= 100) {
+      factory.increaseCapacity = true;
       context.factoryRepository.save(factory);
     }
   }

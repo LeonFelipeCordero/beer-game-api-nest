@@ -34,6 +34,9 @@ export class Factory {
   @Column({ default: false })
   increaseCapacity: boolean;
 
+  @Column({ default: false })
+  increaseInProgress: boolean;
+
   @OneToOne(() => GameSession, (gameSession) => gameSession.factory)
   gameSession: GameSession;
 

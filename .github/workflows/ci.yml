@@ -1,4 +1,4 @@
-name: Beer game CI
+name: CI Workflow 
 
 on:
   push:

@@ -29,6 +29,6 @@ jobs:
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkq.github.com
+          registry: docker.pkg.github.com
           repository: LeonFelipeCordero/beer-game-api-nest/beer-game
           tag_with_ref: true

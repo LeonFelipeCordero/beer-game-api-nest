@@ -70,15 +70,15 @@ describe('Order (e2e)', () => {
         expect(response.body.factory).toBeNull();
       });
 
-    await request(app.getHttpServer())
-      .patch('/orders/' + order.id + '/deliver')
-      .send({ id: order.id, type: 'WholesalerOrder' })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .then((response) => {
-        expect(response.body.status).toBe(OrderStatus.InProgres);
-      });
+    // await request(app.getHttpServer())
+    //   .patch('/orders/' + order.id + '/deliver')
+    //   .send({ id: order.id, type: 'WholesalerOrder' })
+    //   .set('Accept', 'application/json')
+    //   .expect('Content-Type', /json/)
+    //   .expect(200)
+    //   .then((response) => {
+    //     expect(response.body.status).toBe(OrderStatus.InProgres);
+    //   });
   });
 
   afterAll(async () => {

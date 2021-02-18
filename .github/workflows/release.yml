@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+      - name: Installation
         run: yarn
       - name: Release
         env:

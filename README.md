@@ -44,6 +44,10 @@ $ ./env/kind/strat-kind.sh
 ```
 
 ### Deploy mysql
+```
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm install beer-game --set atuh.username=beer-game --set auth.password=beer-game bitnami/mysql
+```
 
 ### Deploy api
 ```bash

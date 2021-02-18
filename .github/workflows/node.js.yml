@@ -10,13 +10,25 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  tests:
     runs-on: ubuntu-latest
+    container: node:latest
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [15.x]
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306
+        env:
+          MYSQL_USER: beer-game
+          MYSQL_PASSWORD: beer-game
+          MYSQL_DATABASE: beer-game
+          MYSQL_ROOT_PASSWORD: beer-game
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
     steps:
     - uses: actions/checkout@v2
@@ -25,5 +37,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: yarn
-    - run: npm test
+    - run: yarn test
     - run: yarn test:e2e
+  

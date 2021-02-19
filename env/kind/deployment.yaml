@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: beer-gane-api-nest
+  name: beer-game-api-nest
   namespace: beer-game
 spec:
   selector:
     matchLabels:
-      app: beer-gane-api-nest
+      app: beer-game-api-nest
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -16,11 +16,11 @@ spec:
   template:
     metadata:
       labels:
-        app: beer-gane-api-nest
+        app: beer-game-api-nest
     spec:
       containers:
-        - name: beer-gane-api-nest
-          image: /beer-gane-api-nest
+        - name: beer-game-api-nest
+          image: localhost:5000/beer-game-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -48,18 +48,20 @@ spec:
             failureThreshold: 5
           env:
             - name: DB_HOST
-              value: beer-game-mysql-0.default
+              value: beer-game-mysql.default
+            - name: DB_USER
+              value: root
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: beer-gane-api-nest
-  namespace: beer-gane
+  name: beer-game-api-nest
+  namespace: beer-game
   labels:
-    app: beer-gane-api-nest
+    app: beer-game-api-nest
 spec:
   ports:
     - port: 8080
       name: server
   selector:
-    app: beer-gane-api-nest
+    app: beer-game-api-nest

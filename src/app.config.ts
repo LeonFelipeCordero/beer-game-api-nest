@@ -4,7 +4,7 @@ const dbConfig = TypeOrmModule.forRoot({
   type: 'mysql',
   host: process.env.DB_HOST || 'localhost',
   port: 3306,
-  username: 'beer-game',
+  username: process.env.DB_USER || 'beer-game',
   password: 'beer-game',
   database: 'beer-game',
   autoLoadEntities: true,

@@ -34,14 +34,14 @@ spec:
               cpu: "1"
           readinessProbe:
             httpGet:
-              path: /health
+              path: v1/health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 5
             failureThreshold: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: v1/health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 5
@@ -65,3 +65,22 @@ spec:
       name: server
   selector:
     app: beer-game-api-nest
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: beer-game-api-nest
+  namespace: beer-game
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: beer-game-api-nest
+                port:
+                  number: 8080
